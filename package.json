@@ -1,8 +1,13 @@
 {
-  "name": "me-test-adapter",
+  "name": "sign-tx-adapter",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@solana/wallet-adapter-base": "^0.9.17",
+    "@solana/wallet-adapter-phantom": "^0.9.16",
+    "@solana/wallet-adapter-react": "^0.15.25",
+    "@solana/wallet-adapter-react-ui": "^0.9.23",
+    "@solana/web3.js": "^1.70.1",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
