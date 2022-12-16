@@ -22,7 +22,7 @@ const Context = ({ children }) => {
   const endpoint = useMemo(() => clusterApiUrl(network), [network]);
 
   const wallets = useMemo(
-    () => [new PhantomWalletAdapter()],
+    () => [new PhantomWalletAdapter()], // confirmed also with `() => []` for wallet-standard only
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [network]
   );
@@ -37,30 +37,13 @@ const Context = ({ children }) => {
 
 const Content = () => {
   const { connection } = useConnection();
-  const { publicKey, sendTransaction, signTransaction } = useWallet();
+  const { publicKey, signTransaction } = useWallet();
 
   const [transactionVariable, setTransactionVariable] = useState({});
   const [reAssignedTransactionVariable, setReAssignedTransactionVariable] =
     useState({});
 
-  // const signAndSendDemoTransaction = async () => {
-  //   if (!publicKey) return;
-  //   try {
-  //     const transaction = await createTransferTransaction(
-  //       publicKey,
-  //       connection
-  //     );
-  //     console.log("unsigned transaction: ", transaction);
-  //     const signature = await sendTransaction(transaction, connection);
-  //     console.log("signature: ", signature);
-  //     await connection.confirmTransaction({ signature });
-  //     console.log("confirmed");
-  //   } catch (error) {
-  //     console.warn(error);
-  //   }
-  // };
-
-  const signDemoTransaction = async () => {
+  const signDemoTransactionWithWalletAdapter = async () => {
     if (!publicKey) return;
     try {
       const transaction = await createTransferTransaction(
@@ -78,14 +61,38 @@ const Content = () => {
     }
   };
 
+  const signDemoTransactionWithWindowProvider = async () => {
+    if (!publicKey) return;
+    try {
+      const transaction = await createTransferTransaction(
+        publicKey,
+        connection
+      );
+      console.log("unsigned transaction: ", transaction);
+      const signedTransaction = await window.phantom.solana.signTransaction(
+        transaction
+      );
+      console.log("previously assigned transaction: ", transaction);
+      setTransactionVariable(transaction);
+      console.log("newly-assigned transaction: ", signedTransaction);
+      setReAssignedTransactionVariable(signedTransaction);
+    } catch (error) {
+      console.warn(error);
+    }
+  };
+
   return (
     <div className="App">
       <div style={{ display: "flex", justifyContent: "center" }}>
         <WalletMultiButton />
       </div>
       <p>Please set your wallet to Devnet</p>
-      {/* <button onClick={signAndSendDemoTransaction}>Sign and Send</button> */}
-      <button onClick={signDemoTransaction}>Sign Only</button>
+      <button onClick={signDemoTransactionWithWalletAdapter}>
+        Sign Only with Wallet Adapter
+      </button>
+      <button onClick={signDemoTransactionWithWindowProvider}>
+        Sign Only with Window Provider
+      </button>
       <p>{`Transaction Variable: ${
         transactionVariable.signatures
           ? JSON.stringify(transactionVariable.signatures)
