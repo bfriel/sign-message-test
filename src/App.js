@@ -2,7 +2,6 @@ import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
 import { PhantomWalletAdapter } from "@solana/wallet-adapter-phantom";
 import {
   ConnectionProvider,
-  useConnection,
   useWallet,
   WalletProvider,
 } from "@solana/wallet-adapter-react";
@@ -14,7 +13,9 @@ import { clusterApiUrl } from "@solana/web3.js";
 import { useMemo, useState } from "react";
 import "./App.css";
 import "@solana/wallet-adapter-react-ui/styles.css";
-import createTransferTransaction from "./utils/createTransferTransaction";
+
+const MESSAGE =
+  "To avoid digital dognappers, sign below to authenticate with CryptoCorgis.";
 
 const Context = ({ children }) => {
   const network = WalletAdapterNetwork.Devnet;
@@ -26,6 +27,7 @@ const Context = ({ children }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [network]
   );
+
   return (
     <ConnectionProvider endpoint={endpoint}>
       <WalletProvider wallets={wallets} autoConnect>
@@ -36,46 +38,32 @@ const Context = ({ children }) => {
 };
 
 const Content = () => {
-  const { connection } = useConnection();
-  const { publicKey, signTransaction } = useWallet();
+  const { publicKey, signMessage } = useWallet();
 
-  const [transactionVariable, setTransactionVariable] = useState({});
-  const [reAssignedTransactionVariable, setReAssignedTransactionVariable] =
-    useState({});
+  const [walletAdapterResult, setWalletAdapterResult] = useState(null);
+  const [windowResult, setWindowResult] = useState(null);
 
-  const signDemoTransactionWithWalletAdapter = async () => {
+  const signMessageWithWalletAdapter = async () => {
     if (!publicKey) return;
     try {
-      const transaction = await createTransferTransaction(
-        publicKey,
-        connection
-      );
-      console.log("unsigned transaction: ", transaction);
-      const signedTransaction = await signTransaction(transaction);
-      console.log("previously assigned transaction: ", transaction);
-      setTransactionVariable(transaction);
-      console.log("newly-assigned transaction: ", signedTransaction);
-      setReAssignedTransactionVariable(signedTransaction);
+      const encodedMessage = new TextEncoder().encode(MESSAGE);
+      const signedMessage = await signMessage(encodedMessage);
+      console.log(signedMessage);
+      setWalletAdapterResult(signedMessage);
     } catch (error) {
       console.warn(error);
     }
   };
 
-  const signDemoTransactionWithWindowProvider = async () => {
+  const signMessageWithWindowProvider = async () => {
     if (!publicKey) return;
     try {
-      const transaction = await createTransferTransaction(
-        publicKey,
-        connection
+      const encodedMessage = new TextEncoder().encode(MESSAGE);
+      const signedMessage = await window.phantom.solana.signMessage(
+        encodedMessage
       );
-      console.log("unsigned transaction: ", transaction);
-      const signedTransaction = await window.phantom.solana.signTransaction(
-        transaction
-      );
-      console.log("previously assigned transaction: ", transaction);
-      setTransactionVariable(transaction);
-      console.log("newly-assigned transaction: ", signedTransaction);
-      setReAssignedTransactionVariable(signedTransaction);
+      console.log(signedMessage);
+      setWindowResult(signedMessage);
     } catch (error) {
       console.warn(error);
     }
@@ -83,26 +71,39 @@ const Content = () => {
 
   return (
     <div className="App">
-      <div style={{ display: "flex", justifyContent: "center" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          marginTop: 30,
+          marginBottom: 30,
+        }}
+      >
         <WalletMultiButton />
       </div>
-      <p>Please set your wallet to Devnet</p>
-      <button onClick={signDemoTransactionWithWalletAdapter}>
-        Sign Only with Wallet Adapter
-      </button>
-      <button onClick={signDemoTransactionWithWindowProvider}>
-        Sign Only with Window Provider
-      </button>
-      <p>{`Transaction Variable: ${
-        transactionVariable.signatures
-          ? JSON.stringify(transactionVariable.signatures)
-          : "Awaiting signature..."
-      }`}</p>
-      <p>{`Re-assigned Transaction Variable: ${
-        reAssignedTransactionVariable.signatures
-          ? JSON.stringify(reAssignedTransactionVariable.signatures)
-          : "Awaiting signature..."
-      }`}</p>
+      {publicKey ? (
+        <>
+          <button onClick={signMessageWithWalletAdapter}>
+            signMessage with Wallet Adapter
+          </button>
+          <button onClick={signMessageWithWindowProvider}>
+            signMessage with Window Provider
+          </button>
+          <h3>Wallet Adapter Result</h3>
+          <p>
+            {walletAdapterResult
+              ? JSON.stringify(walletAdapterResult)
+              : "Awaiting signature"}
+          </p>
+          <h3>Window Provider Result</h3>
+          <p>
+            {" "}
+            {windowResult ? JSON.stringify(windowResult) : "Awaiting signature"}
+          </p>
+        </>
+      ) : (
+        <p>Please connect your wallet</p>
+      )}
     </div>
   );
 };

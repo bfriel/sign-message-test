@@ -1,11 +1,12 @@
 {
-  "name": "sign-tx-adapter",
+  "name": "sign-message-test",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@solana/wallet-adapter-base": "^0.9.17",
-    "@solana/wallet-adapter-phantom": "^0.9.16",
-    "@solana/wallet-adapter-react": "^0.15.25",
+    "@solana/wallet-adapter-base": "^0.9.18",
+    "@solana/wallet-adapter-phantom": "^0.9.20",
+    "@solana/wallet-adapter-react": "^0.15.21-rc.9",
+    "@solana/wallet-adapter-wallets": "^0.19.11",
     "@solana/wallet-adapter-react-ui": "^0.9.23",
     "@solana/web3.js": "^1.70.1",
     "@testing-library/jest-dom": "^5.16.5",
