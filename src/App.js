@@ -17,6 +17,8 @@ import "@solana/wallet-adapter-react-ui/styles.css";
 const MESSAGE =
   "To avoid digital dognappers, sign below to authenticate with CryptoCorgis.";
 
+// test comment
+
 const Context = ({ children }) => {
   const network = WalletAdapterNetwork.Devnet;
 
